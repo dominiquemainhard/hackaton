@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d92d3f">
+<title>Qué comemos?</title>
+<link rel="stylesheet" href="/mobile.css">
+</head>
+<body>
+  <header id="top">
+    <div class="row">
+      <span id="slotPill" class="pill">ALMUERZO</span>
+      <span id="clock" class="muted">—</span>
+    </div>
+    <h1>DE DÓNDE<br>PEDIMOS?</h1>
+    <p id="status" class="muted">—</p>
+  </header>
+
+  <section id="whoami">
+    <label for="name">Tu nombre</label>
+    <div class="name-row">
+      <input id="name" type="text" placeholder="ej. Anto" autocomplete="given-name" maxlength="24">
+      <button id="saveName" class="ghost">Guardar</button>
+    </div>
+  </section>
+
+  <main id="list"></main>
+
+  <section id="addPlace">
+    <button id="toggleAdd" class="ghost wide">+ Agregar un lugar</button>
+    <form id="addForm" hidden>
+      <p class="muted small">Los lugares quedan para siempre. Lo único que se borra cada noche son los votos.</p>
+      <div class="add-grid">
+        <input id="newEmoji" placeholder="🍕" maxlength="4">
+        <input id="newName" placeholder="Nombre del lugar" maxlength="40" required>
+      </div>
+      <input id="newCuisine" placeholder="Qué venden (ej. milanesas)" maxlength="30">
+      <div class="slots">
+        <label><input type="checkbox" id="newLunch" checked> Almuerzo</label>
+        <label><input type="checkbox" id="newSnack"> Merienda</label>
+      </div>
+      <button class="primary" type="submit">Agregar lugar</button>
+    </form>
+  </section>
+
+  <footer id="foot">
+    <span id="myVote" class="muted">Todavía no te sumaste.</span>
+    <button id="clearVote" class="ghost" hidden>Bajarme</button>
+  </footer>
+
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-inner">
+      <div class="sheet-head">
+        <h2 id="sheetTitle">—</h2>
+        <button id="closeSheet" class="ghost">Cerrar</button>
+      </div>
+      <div id="sheetStats" class="muted"></div>
+
+      <form id="reviewForm">
+        <div id="starPicker" class="stars-pick">
+          <button type="button" data-v="1">★</button><button type="button" data-v="2">★</button>
+          <button type="button" data-v="3">★</button><button type="button" data-v="4">★</button>
+          <button type="button" data-v="5">★</button>
+        </div>
+        <textarea id="reviewText" maxlength="240" rows="2" placeholder="Cómo estuvo? (opcional)"></textarea>
+        <button id="submitReview" class="primary" type="submit">Publicar reseña</button>
+      </form>
+
+      <div id="reviewList"></div>
+    </div>
+  </div>
+
+  <div id="toast" hidden></div>
+<script src="/mobile.js"></script>
+</body>
+</html>

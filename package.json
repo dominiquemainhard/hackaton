@@ -1,0 +1,12 @@
+{
+  "name": "what-do-we-eat-today",
+  "version": "1.0.0",
+  "description": "Office lunch/snack voting board for a 1920x1080 wall screen, with QR voting from phones.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "verify-qr": "node tools/qr-png.js \"http://localhost:8080/m\" /tmp/qr-check.png && swift tools/decode.swift /tmp/qr-check.png"
+  },
+  "engines": { "node": ">=18" }
+}

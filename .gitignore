@@ -1,0 +1,5 @@
+# runtime state: votes and reseñas, recreated (seeded) on first start
+data/
+
+node_modules/
+.DS_Store

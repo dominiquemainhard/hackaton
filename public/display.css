@@ -1,0 +1,332 @@
+/*
+ * Sizes are in rem. display.js sets the root font-size from the viewport, so
+ * 1rem = 16px on a 1920x1080 wall screen and the whole board scales from there.
+ */
+:root {
+  --ink: #111014;
+  --muted: #8b8b93;
+  --red: #d92d3f;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: #fff;
+  overflow: hidden;
+  font-family: 'Helvetica Neue', Helvetica, Inter, Arial, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+#stage {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  /* minmax(0,...) keeps the wide marquee from stretching the whole layout */
+  grid-template-columns: minmax(0, 1fr);
+  padding: 3.5rem 0 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------------ header */
+#head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0 4rem;
+  gap: 2.5rem;
+}
+
+#title {
+  font-size: 6.5rem;
+  line-height: 0.86;
+  letter-spacing: -0.045em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+#meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.125rem;
+  margin-top: 1.625rem;
+  font-size: 1.625rem;
+  color: var(--muted);
+}
+
+.pill {
+  background: var(--red);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: 0.14em;
+  padding: 0.5625rem 1.25rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.pill.upcoming { background: var(--ink); }
+.pill.closed { background: var(--muted); }
+
+.dot { width: 0.375rem; height: 0.375rem; border-radius: 50%; background: #d5d5db; flex: none; }
+#tally { font-variant-numeric: tabular-nums; }
+
+.head-right { display: flex; justify-content: flex-end; flex: none; }
+
+#qrCard {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+#qr { width: 10.5rem; height: 10.5rem; flex: none; }
+#qr svg { display: block; width: 100%; height: 100%; }
+
+#qrCaption { display: flex; flex-direction: column; gap: 0.375rem; max-width: 14rem; }
+#qrCaption strong {
+  font-size: 1.625rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.1;
+}
+#qrCaption span {
+  font-size: 1.1875rem;
+  color: var(--muted);
+  word-break: break-all;
+  line-height: 1.2;
+}
+
+/* ---------------------------------------------------------------- carrusel */
+#carousel {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  margin-top: 2.75rem;
+  display: flex;
+  align-items: stretch;
+}
+
+#track {
+  display: flex;
+  gap: 1.75rem;
+  padding: 0 4rem;
+  will-change: transform;
+}
+
+.card {
+  position: relative;
+  flex: 0 0 25.25rem;
+  height: 100%;
+  padding: 2.125rem 2.125rem 1.875rem;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.card-emoji { font-size: 3.375rem; line-height: 1; }
+
+.card-name {
+  margin-top: 1.125rem;
+  font-size: 2.875rem;
+  font-weight: 800;
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.card-cuisine {
+  margin-top: 0.75rem;
+  font-size: 1.25rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.card-count {
+  margin-top: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.card-count b {
+  font-size: 7.5rem;
+  font-weight: 800;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+.card-count span {
+  font-size: 1.375rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.card-count b.bump { animation: bump 0.5s cubic-bezier(.2,1.6,.4,1); }
+@keyframes bump { 0% { transform: scale(1); } 35% { transform: scale(1.16); } 100% { transform: scale(1); } }
+
+.voters {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 8.25rem;
+  overflow: hidden;
+}
+.voter {
+  background: rgba(255, 255, 255, 0.19);
+  border-radius: 999px;
+  padding: 0.4375rem 0.875rem 0.375rem;
+  font-size: 1.1875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.voter em { font-style: normal; opacity: 0.72; font-weight: 400; }
+.voters:empty::after {
+  content: 'nadie todavía';
+  font-size: 1.1875rem;
+  opacity: 0.55;
+}
+
+.card-rating {
+  margin-top: 1.375rem;
+  padding-top: 1.125rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+}
+.stars { letter-spacing: 2px; }
+.card-rating span { opacity: 0.75; }
+
+.badge {
+  position: absolute;
+  top: 2.125rem;
+  right: 2.125rem;
+  background: #fff;
+  color: var(--ink);
+  font-size: 1.0625rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  padding: 0.4375rem 0.8125rem 0.375rem;
+}
+
+.empty-card {
+  flex: 0 0 100%;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 2.125rem;
+  text-align: center;
+  padding: 0 4rem;
+}
+
+/* ------------------------------------------------------------------ footer */
+#foot {
+  display: flex;
+  align-items: center;
+  gap: 1.375rem;
+  border-top: 1px solid #ececf0;
+  margin: 2.125rem 4rem 0;
+  padding-top: 2.125rem;
+}
+.foot-label {
+  flex: 0 0 auto;
+  background: var(--ink);
+  color: #fff;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  padding: 0.4375rem 0.75rem 0.375rem;
+}
+#ticker { overflow: hidden; flex: 1; min-width: 0; }
+#tickerTrack {
+  display: flex;
+  gap: 2.875rem;
+  white-space: nowrap;
+  font-size: 1.4375rem;
+  color: var(--muted);
+  will-change: transform;
+}
+#tickerTrack b { color: var(--ink); font-weight: 700; }
+#tickerTrack i { font-style: normal; color: var(--red); }
+
+#offline {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 4rem;
+  font-size: 1.125rem;
+  color: var(--red);
+  letter-spacing: 0.08em;
+}
+
+/* -------------------------------------------------- "fulano suma" takeover */
+#confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+}
+
+#shout {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0 5rem;
+  background: rgba(255, 255, 255, 0.93);
+  text-align: center;
+  animation: shoutIn 0.45s cubic-bezier(.15,1.4,.4,1);
+}
+#shout[hidden] { display: none; }
+#shout.out { animation: shoutOut 0.4s ease forwards; }
+
+#shoutText {
+  font-size: 8rem;
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+#shoutText i { font-style: normal; color: var(--red); }
+#shoutNote {
+  font-size: 2.5rem;
+  color: var(--muted);
+}
+#shoutNote:empty { display: none; }
+
+@keyframes shoutIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes shoutOut {
+  to { opacity: 0; transform: scale(1.04); }
+}
+
+/* ------------------------------------------------------- narrow / portrait */
+body.narrow #stage { padding: 2rem 0 1.5rem; }
+body.narrow #head {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.5rem;
+  padding: 0 2rem;
+}
+body.narrow .head-right { justify-content: flex-start; }
+body.narrow #qr { width: 8rem; height: 8rem; }
+body.narrow #title { font-size: 5rem; }
+body.narrow #carousel { margin-top: 2rem; }
+body.narrow #track { padding: 0 2rem; }
+body.narrow .card { flex-basis: 22rem; }
+body.narrow #foot { margin: 1.5rem 2rem 0; padding-top: 1.5rem; }
+body.narrow #shoutText { font-size: 5rem; }
+
+body.tiny .card-count b { font-size: 6rem; }
+body.tiny .voters { max-height: 5.5rem; }
+body.tiny #foot { display: none; }

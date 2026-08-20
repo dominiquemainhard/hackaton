@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qué comemos?</title>
+<link rel="stylesheet" href="/display.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍔</text></svg>">
+</head>
+<body>
+  <div id="stage">
+    <header id="head">
+      <div class="head-left">
+        <h1 id="title">QUÉ<br>COMEMOS?</h1>
+        <div id="meta">
+          <span id="slotPill" class="pill">ALMUERZO</span>
+          <span id="countdown" class="meta-item">—</span>
+          <span class="dot"></span>
+          <span id="clock" class="meta-item">—</span>
+          <span class="dot"></span>
+          <span id="tally" class="meta-item">0 sumados</span>
+        </div>
+      </div>
+      <div class="head-right">
+        <div id="qrCard">
+          <div id="qr"></div>
+          <div id="qrCaption">
+            <strong>ESCANEÁ<br>Y SUMATE</strong>
+            <span id="joinUrl">—</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="carousel">
+      <div id="track"></div>
+    </main>
+
+    <footer id="foot">
+      <span class="foot-label">EN VIVO</span>
+      <div id="ticker"><div id="tickerTrack"></div></div>
+    </footer>
+
+    <div id="offline" hidden>reconectando…</div>
+
+    <canvas id="confetti"></canvas>
+    <div id="shout" hidden>
+      <div id="shoutText"></div>
+      <div id="shoutNote"></div>
+    </div>
+  </div>
+<script src="/lib/qr.js"></script>
+<script src="/display.js"></script>
+</body>
+</html>

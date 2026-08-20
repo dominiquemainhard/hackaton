@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · Qué comemos?</title>
+<link rel="stylesheet" href="/mobile.css">
+<style>
+  body { max-width: 720px; margin: 0 auto; padding-bottom: 40px; }
+  h1 { font-size: 34px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.03em; margin-bottom: 6px; }
+  .form-grid { display: grid; grid-template-columns: 70px 1fr 1fr; gap: 8px; margin: 14px 0 10px; }
+  .slots { display: flex; gap: 14px; align-items: center; margin: 6px 0 14px; font-size: 15px; }
+  .slots label { display: flex; align-items: center; gap: 6px; }
+  .slots input { width: auto; flex: none; }
+  .r { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center;
+       padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .r-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .tag { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; background: var(--line);
+         padding: 3px 7px; border-radius: 5px; margin-left: 6px; }
+  .danger { color: var(--red); border-color: #f3c8cd; }
+  section { margin-top: 28px; }
+</style>
+</head>
+<body>
+  <h1>Admin</h1>
+  <p class="muted">Los lugares que aparecen en la pantalla. Los votos se borran todos los días a las 23:00 ART; los lugares y las reseñas quedan.</p>
+
+  <section>
+    <h2 style="font-size:18px;font-weight:700">Agregar / editar un lugar</h2>
+    <form id="form">
+      <input type="hidden" id="rid">
+      <div class="form-grid">
+        <input id="emoji" placeholder="🍔" maxlength="4">
+        <input id="rname" placeholder="Nombre" maxlength="40" required>
+        <input id="cuisine" placeholder="Qué venden" maxlength="30">
+      </div>
+      <div class="slots">
+        <label><input type="checkbox" id="slotLunch" checked> Almuerzo (11-13)</label>
+        <label><input type="checkbox" id="slotSnack"> Merienda (15-17)</label>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="primary" type="submit">Guardar lugar</button>
+        <button class="ghost" type="button" id="cancel" hidden>Cancelar</button>
+      </div>
+    </form>
+  </section>
+
+  <section>
+    <h2 style="font-size:18px;font-weight:700">Lugares</h2>
+    <div id="list"></div>
+  </section>
+
+  <section>
+    <button class="ghost danger" id="reset">Borrar los votos de hoy</button>
+  </section>
+
+  <div id="toast" hidden></div>
+<script src="/admin.js"></script>
+</body>
+</html>
