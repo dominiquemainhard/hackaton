@@ -6,6 +6,7 @@ const path = require('node:path');
 const os = require('node:os');
 
 const db = require('./lib/db.js');
+const net = require('./lib/net.js');
 const time = require('./lib/time.js');
 
 const PORT = Number(process.env.PORT || 8080);
@@ -19,22 +20,11 @@ const MIME = {
   '.ico': 'image/x-icon',
 };
 
-/** Every IPv4 address a phone could reach this machine on. */
-function lanAddresses() {
-  const out = [];
-  for (const [name, addrs] of Object.entries(os.networkInterfaces())) {
-    for (const a of addrs || []) {
-      if (a.family === 'IPv4' && !a.internal) out.push({ name, address: a.address });
-    }
-  }
-  return out;
-}
-
 /** The address the QR points at. Override with PUBLIC_URL when behind a tunnel. */
 function lanUrl() {
   if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
-  const first = lanAddresses()[0];
-  return first ? `http://${first.address}:${PORT}` : `http://localhost:${PORT}`;
+  const best = net.lanAddresses()[0];
+  return best ? `http://${best.address}:${PORT}` : `http://localhost:${PORT}`;
 }
 
 // ------------------------------------------------------------------ SSE hub
@@ -208,6 +198,7 @@ const server = http.createServer(async (req, res) => {
 
 // Keeps clocks, slot switches and the 23:00 wipe live on the wall screen.
 setInterval(() => {
+  net.refreshRoutedAddress(broadcast); // networks change; the QR should follow
   const rolled = db.rollover();
   if (rolled) broadcast();
   for (const res of clients) res.write(': ping\n\n');
@@ -222,12 +213,14 @@ setInterval(() => {
   }
 }, 5000);
 
+net.refreshRoutedAddress(broadcast);
+
 server.listen(PORT, () => {
   const t = time.describe();
   console.log(`\n  QUÉ COMEMOS?`);
   console.log(`  pantalla  : http://localhost:${PORT}/`);
   console.log(`  celulares : ${lanUrl()}/m   <- lo que apunta el QR`);
-  for (const { name, address } of lanAddresses().slice(1)) {
+  for (const { name, address } of net.lanAddresses().slice(1)) {
     console.log(`              http://${address}:${PORT}/m   (${name}, alternativa)`);
   }
   console.log(`  admin     : http://localhost:${PORT}/admin`);

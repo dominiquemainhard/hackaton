@@ -41,6 +41,11 @@ layout for tablets and portrait screens.
 | --- | --- | --- |
 | `PORT` | `8080` | HTTP port |
 | `PUBLIC_URL` | auto-detected LAN IP | what the QR points at (set this behind a tunnel/reverse proxy) |
+
+The auto-detection asks the kernel which interface carries the default route (via a
+UDP socket that sends nothing) and ignores link-local `169.254.x.x` addresses, so an
+unplugged dongle or a NIC without a lease can't hijack the QR. It re-checks every 15s
+and the wall screen redraws the code if the address changes.
 | `ALLOW_CLOSED_VOTES` | unset | `1` lets people vote outside the windows (handy for demos) |
 
 ## Timing (Argentina, `America/Argentina/Buenos_Aires`)
@@ -82,6 +87,7 @@ The places it ships with, all six assigned to both almuerzo and merienda: Casa E
 ```
 server.js          HTTP + JSON API + SSE broadcast
 lib/qr.js          QR encoder (byte mode, versions 1-10, ECC L/M) - runs in Node and the browser
+lib/net.js         picks the LAN address the QR points at
 lib/time.js        Argentina clock, slot windows, 23:00 service-day rollover
 lib/db.js          JSON store with atomic writes, vote/review rules
 public/display.*   the wall screen (1920x1080 by design, responsive), confetti takeover
