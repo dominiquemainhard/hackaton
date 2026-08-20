@@ -366,7 +366,10 @@ let firstLoad = true;
 async function load() {
   try {
     const res = await fetch('/api/state' + (pinnedSlot ? `?slot=${encodeURIComponent(pinnedSlot)}` : ''), { cache: 'no-store' });
-    state = await res.json();
+    const next = await res.json();
+    // A restarted server means this tab may be running old code: start clean.
+    if (state && next.boot && state.boot && next.boot !== state.boot) return location.reload();
+    state = next;
     offlineEl.hidden = true;
     render();
     checkNewVotes(firstLoad);

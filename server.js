@@ -10,6 +10,8 @@ const net = require('./lib/net.js');
 const time = require('./lib/time.js');
 
 const PORT = Number(process.env.PORT || 8080);
+/** Changes on every restart; the wall screen reloads itself when it sees a new one. */
+const BOOT_ID = String(Date.now());
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -82,6 +84,7 @@ function stateFor(slotOverride) {
     t.countdown = { label: 'vista fija', minutes: null };
   }
   return {
+    boot: BOOT_ID,
     time: t,
     slot,
     pinned: slot !== t.slot,
