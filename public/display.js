@@ -165,22 +165,42 @@ function tickerPassWidth(count) {
   return kids[count].offsetLeft - kids[0].offsetLeft;
 }
 
+const QR_CACHE = 'wdwet.joinUrl';
 let qrRendered = '';
+
+function drawQR(url) {
+  if (qrRendered === url) return;
+  qrRendered = url;
+  document.getElementById('qr').innerHTML = QR.toSVG(url, { ecc: 'M', quiet: 3 });
+  document.getElementById('qrCaption').innerHTML =
+    '<strong>ESCANEÁ<br>Y SUMATE</strong><span id="joinUrl">' +
+    esc(url.replace(/^https?:\/\//, '')) + '</span>';
+}
+
+function drawNoNetwork() {
+  if (qrRendered === '\u0000sinred') return;
+  qrRendered = '\u0000sinred';
+  document.getElementById('qr').innerHTML = '<div class="qr-down">!</div>';
+  document.getElementById('qrCaption').innerHTML =
+    '<strong>SIN RED</strong><span>La compu no tiene IP en la red, nadie puede escanear. ' +
+    'Reconectá el Wi-Fi.</span>';
+}
+
 function renderQR() {
-  const key = state.joinUrl + state.reachable;
-  if (qrRendered === key) return;
-  qrRendered = key;
-  const box = document.getElementById('qr');
-  const caption = document.getElementById('qrCaption');
-  if (state.reachable === false) {
-    box.innerHTML = '<div class="qr-down">!</div>';
-    caption.innerHTML = '<strong>SIN RED</strong><span>La compu no tiene IP en la red, ' +
-      'nadie puede escanear. Reconectá el Wi-Fi.</span>';
-    return;
-  }
-  box.innerHTML = QR.toSVG(state.joinUrl, { ecc: 'M', quiet: 3 });
-  caption.innerHTML = '<strong>ESCANEÁ<br>Y SUMATE</strong><span id="joinUrl">' +
-    esc(state.joinUrl.replace(/^https?:\/\//, '')) + '</span>';
+  if (state.reachable === false) return drawNoNetwork();
+  drawQR(state.joinUrl);
+  try { localStorage.setItem(QR_CACHE, state.joinUrl); } catch { /* private mode */ }
+}
+
+/**
+ * Paint the last known code before the first fetch even lands, so a slow or
+ * failed request never leaves the corner of the wall empty.
+ */
+function drawCachedQR() {
+  try {
+    const cached = localStorage.getItem(QR_CACHE);
+    if (cached) drawQR(cached);
+  } catch { /* private mode */ }
 }
 
 function render() {
@@ -367,6 +387,7 @@ function connect() {
 const streaming = !new URLSearchParams(location.search).has('nostream');
 
 fit();
+drawCachedQR();
 load();
 if (streaming) connect();
 setInterval(load, streaming ? 20000 : 5000); // clock + slot changes even if SSE is quiet
