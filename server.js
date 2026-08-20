@@ -70,6 +70,7 @@ function serveStatic(res, urlPath) {
 
 function stateFor(slotOverride) {
   const t = time.describe();
+  const joinUrl = lanUrl() + '/m';
   const slot = slotOverride === 'lunch' || slotOverride === 'snack' ? slotOverride : t.slot;
   if (slot !== t.slot) {
     // Pinned view: label the slot being shown, not the one the clock is in.
@@ -86,7 +87,10 @@ function stateFor(slotOverride) {
     pinned: slot !== t.slot,
     options: db.board(slot),
     feed: db.feed(14, slot),
-    joinUrl: lanUrl() + '/m',
+    joinUrl,
+    // No LAN address means the QR would point at this machine only: say so on
+    // the wall instead of showing a code nobody can scan.
+    reachable: !/^https?:\/\/(localhost|127\.)/.test(joinUrl),
     votingOpen: t.phase !== 'closed' || process.env.ALLOW_CLOSED_VOTES === '1',
   };
 }

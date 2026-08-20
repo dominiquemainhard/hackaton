@@ -84,6 +84,17 @@ html, body {
 #qr { width: 14.5rem; height: 14.5rem; flex: none; }
 #qr svg { display: block; width: 100%; height: 100%; }
 
+.qr-down {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: var(--red);
+  color: #fff;
+  font-size: 7rem;
+  font-weight: 800;
+}
+
 #qrCaption { display: flex; flex-direction: column; gap: 0.375rem; max-width: 14rem; }
 #qrCaption strong {
   font-size: 1.875rem;
@@ -94,7 +105,7 @@ html, body {
 #qrCaption span {
   font-size: 1.375rem;
   color: var(--muted);
-  word-break: break-all;
+  overflow-wrap: anywhere;
   line-height: 1.2;
 }
 

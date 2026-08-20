@@ -137,7 +137,8 @@ function renderHeader() {
 
   const total = state.options.reduce((a, o) => a + o.votes, 0);
   document.getElementById('tally').textContent = total === 1 ? '1 sumado' : `${total} sumados`;
-  document.getElementById('joinUrl').textContent = state.joinUrl.replace(/^https?:\/\//, '');
+  const urlEl = document.getElementById('joinUrl');
+  if (urlEl) urlEl.textContent = state.joinUrl.replace(/^https?:\/\//, '');
 }
 
 function renderTicker() {
@@ -166,9 +167,20 @@ function tickerPassWidth(count) {
 
 let qrRendered = '';
 function renderQR() {
-  if (qrRendered === state.joinUrl) return;
-  qrRendered = state.joinUrl;
-  document.getElementById('qr').innerHTML = QR.toSVG(state.joinUrl, { ecc: 'M', quiet: 3 });
+  const key = state.joinUrl + state.reachable;
+  if (qrRendered === key) return;
+  qrRendered = key;
+  const box = document.getElementById('qr');
+  const caption = document.getElementById('qrCaption');
+  if (state.reachable === false) {
+    box.innerHTML = '<div class="qr-down">!</div>';
+    caption.innerHTML = '<strong>SIN RED</strong><span>La compu no tiene IP en la red, ' +
+      'nadie puede escanear. Reconectá el Wi-Fi.</span>';
+    return;
+  }
+  box.innerHTML = QR.toSVG(state.joinUrl, { ecc: 'M', quiet: 3 });
+  caption.innerHTML = '<strong>ESCANEÁ<br>Y SUMATE</strong><span id="joinUrl">' +
+    esc(state.joinUrl.replace(/^https?:\/\//, '')) + '</span>';
 }
 
 function render() {
