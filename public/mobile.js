@@ -226,8 +226,15 @@ $('addForm').addEventListener('submit', async (e) => {
 
 // ---------------------------------------------------------------------- data
 async function load() {
-  state = await api('/api/state');
-  render();
+  try {
+    state = await api('/api/state');
+    render();
+  } catch {
+    // Don't leave a blank page: say what's wrong.
+    $('status').textContent = 'Sin conexión con la pantalla.';
+    $('list').innerHTML = '<p class="muted">No llego al servidor. Fijate de estar en la misma red Wi-Fi que la compu ' +
+      'que corre la app (algunas redes de oficina no dejan que los celulares vean a las computadoras).</p>';
+  }
 }
 
 function connect() {

@@ -48,9 +48,8 @@ layout for tablets and portrait screens.
 | Argentina time | What the screen shows | Voting |
 | --- | --- | --- |
 | 00:00–10:59 | Almuerzo, *abre en …* | open (vote early) |
-| 11:00–12:59 | **Almuerzo**, *cierra en …* | open |
-| 13:00–14:59 | Merienda, *abre en …* | open (vote early) |
-| 15:00–16:59 | **Merienda**, *cierra en …* | open |
+| 11:00–13:59 | **Almuerzo**, *cierra en …* | open |
+| 14:00–16:59 | **Merienda**, *cierra en …* | open |
 | 17:00–22:59 | Almuerzo, *abre mañana* | closed |
 | **23:00** | — | **all votes wiped, reviews kept** |
 
@@ -58,8 +57,9 @@ The wipe is keyed on a "service day" that rolls over at 23:00, and it is re-chec
 every read and write. So the reset still happens correctly if the server was asleep,
 restarted, or offline across 23:00 — not just if a timer happened to fire.
 
-Voting is deliberately open before a window (people decide early) and blocked in the
-evening, since anything voted after 17:00 would be erased at 23:00 anyway. Set
+Almuerzo runs straight into merienda at 14:00, so there is no dead time between them.
+Voting is deliberately open before the first window (people decide early) and blocked in
+the evening, since anything voted after 17:00 would be erased at 23:00 anyway. Set
 `ALLOW_CLOSED_VOTES=1` to lift that.
 
 Windows and the reset hour live at the top of [lib/time.js](lib/time.js).
@@ -73,9 +73,9 @@ Windows and the reset hour live at the top of [lib/time.js](lib/time.js).
 - Anyone can add a place from their phone (`POST /api/place`). A place can be assigned to
   lunch, snack, or both. Removing one is deliberately admin-only.
 
-The places it ships with: Casa Endivia (ensaladas), Kiddo (hamburguesas), Ipolitina (pizza
-y sandwiches), Darwin (tarta), Aspen (fideos), Mon Poulet (pollo). Ipolitina and Darwin are
-also assigned to merienda so that slot isn't empty on day one — change that in `/admin`.
+The places it ships with, all six assigned to both almuerzo and merienda: Casa Endivia
+(ensaladas), Kiddo (hamburguesas), Ipolitina (pizza y sandwiches), Darwin (tarta), Aspen
+(fideos), Mon Poulet (pollo).
 
 ## Layout
 
@@ -85,6 +85,8 @@ lib/qr.js          QR encoder (byte mode, versions 1-10, ECC L/M) - runs in Node
 lib/time.js        Argentina clock, slot windows, 23:00 service-day rollover
 lib/db.js          JSON store with atomic writes, vote/review rules
 public/display.*   the wall screen (1920x1080 by design, responsive), confetti takeover
+                   the carousel repeats the list until it covers the screen, so it never
+                   scrolls into blank space when there are only a couple of options
 public/mobile.*    the phone page
 public/admin.*     restaurant assignment
 data/db.json       created on first run, seeded with example places

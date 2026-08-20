@@ -19,15 +19,22 @@ const MIME = {
   '.ico': 'image/x-icon',
 };
 
-/** The address phones should hit. Override with PUBLIC_URL when behind a tunnel. */
-function lanUrl() {
-  if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
-  for (const [, addrs] of Object.entries(os.networkInterfaces())) {
+/** Every IPv4 address a phone could reach this machine on. */
+function lanAddresses() {
+  const out = [];
+  for (const [name, addrs] of Object.entries(os.networkInterfaces())) {
     for (const a of addrs || []) {
-      if (a.family === 'IPv4' && !a.internal) return `http://${a.address}:${PORT}`;
+      if (a.family === 'IPv4' && !a.internal) out.push({ name, address: a.address });
     }
   }
-  return `http://localhost:${PORT}`;
+  return out;
+}
+
+/** The address the QR points at. Override with PUBLIC_URL when behind a tunnel. */
+function lanUrl() {
+  if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
+  const first = lanAddresses()[0];
+  return first ? `http://${first.address}:${PORT}` : `http://localhost:${PORT}`;
 }
 
 // ------------------------------------------------------------------ SSE hub
@@ -219,7 +226,10 @@ server.listen(PORT, () => {
   const t = time.describe();
   console.log(`\n  QUÉ COMEMOS?`);
   console.log(`  pantalla  : http://localhost:${PORT}/`);
-  console.log(`  celulares : ${lanUrl()}/m`);
+  console.log(`  celulares : ${lanUrl()}/m   <- lo que apunta el QR`);
+  for (const { name, address } of lanAddresses().slice(1)) {
+    console.log(`              http://${address}:${PORT}/m   (${name}, alternativa)`);
+  }
   console.log(`  admin     : http://localhost:${PORT}/admin`);
   console.log(`  argentina : ${t.clock} · ${t.slotLabel} (${t.phase}) · los votos se borran a las ${t.resetHour}:00\n`);
 });

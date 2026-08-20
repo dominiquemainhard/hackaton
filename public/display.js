@@ -27,7 +27,7 @@ function fit() {
   document.body.classList.toggle('narrow', !wide);
   document.body.classList.toggle('tiny', h < 520 || w < 560);
   sizeConfetti();
-  setWidth();
+  if (state) { renderCards(); renderTicker(); } else setWidth();
 }
 window.addEventListener('resize', fit);
 
@@ -78,19 +78,36 @@ function cardEl(option, index, total, isLeader) {
   return el;
 }
 
-function renderCards() {
-  const options = state.options;
-  if (!options.length) {
-    track.innerHTML = '<div class="empty-card">Todavía no hay lugares cargados para este turno — sumá uno desde el celular.</div>';
-    return;
-  }
-  // Two identical passes make the marquee loop seamlessly.
+function buildTrack(options, passes) {
   const frag = document.createDocumentFragment();
-  for (let pass = 0; pass < 2; pass++) {
+  for (let pass = 0; pass < passes; pass++) {
     options.forEach((o, i) => frag.appendChild(cardEl(o, i, options.length, i === 0)));
   }
   track.innerHTML = '';
   track.appendChild(frag);
+}
+
+/** Distance from one pass of the list to the next — the marquee's loop length. */
+function passWidth(count) {
+  const kids = track.children;
+  if (kids.length <= count) return 0;
+  return kids[count].offsetLeft - kids[0].offsetLeft;
+}
+
+function renderCards() {
+  const options = state.options;
+  if (!options.length) {
+    track.innerHTML = '<div class="empty-card">Todavía no hay lugares cargados para este turno — sumá uno desde el celular.</div>';
+    loopWidth = 0;
+    return;
+  }
+  // Repeat the list until it covers the screen plus a full pass. With two or
+  // three options a single repeat is narrower than the screen, and the marquee
+  // would scroll into blank space before wrapping around.
+  buildTrack(options, 2);
+  const one = passWidth(options.length);
+  const needed = one > 0 ? Math.max(2, Math.ceil(window.innerWidth / one) + 1) : 2;
+  if (needed !== 2) buildTrack(options, needed);
   setWidth();
 }
 
@@ -129,7 +146,22 @@ function renderTicker() {
         ? `<span><b>${esc(f.name)}</b> → ${esc(f.place)}${f.note ? ` <i>(${esc(f.note)})</i>` : ''}</span>`
         : `<span><b>${esc(f.name)}</b> puntuó ${esc(f.place)} <i>${'★'.repeat(f.rating)}</i>${f.text ? ` “${esc(f.text)}”` : ''}</span>`)
     : ['<span>Escaneá el QR para sumarte y decir de dónde pedís.</span>'];
-  tickerTrack.innerHTML = items.join('') + items.join('');
+  const one = items.join('');
+  tickerTrack.innerHTML = one + one;
+  // Same trick as the cards: with one or two entries the strip is shorter than
+  // the screen, so repeat it until it isn't.
+  const width = tickerPassWidth(items.length);
+  if (width > 0) {
+    const needed = Math.max(2, Math.ceil(window.innerWidth / width) + 1);
+    if (needed !== 2) tickerTrack.innerHTML = one.repeat(needed);
+  }
+  tickerLoop = tickerPassWidth(items.length);
+}
+
+function tickerPassWidth(count) {
+  const kids = tickerTrack.children;
+  if (kids.length <= count) return 0;
+  return kids[count].offsetLeft - kids[0].offsetLeft;
 }
 
 let qrRendered = '';
@@ -155,29 +187,31 @@ function render() {
 
 // ------------------------------------------------------------------ marquee
 let offset = 0;
-let halfWidth = 0;
+let loopWidth = 0;
 let tickerOffset = 0;
+let tickerLoop = 0;
 let lastFrame = 0;
 
 function setWidth() {
-  halfWidth = track.scrollWidth / 2;
-  if (halfWidth > 0) offset = offset % halfWidth;
+  loopWidth = state && state.options.length ? passWidth(state.options.length) : 0;
+  if (loopWidth > 0) offset = offset % loopWidth;
 }
 
 function frame(ts) {
   const dt = lastFrame ? Math.min((ts - lastFrame) / 1000, 0.1) : 0;
   lastFrame = ts;
 
-  if (halfWidth > 0 && track.children.length > 1) {
+  if (loopWidth > 0) {
     offset += 2.875 * rootPx * dt; // ~46px/s on a 1920-wide screen
-    if (offset >= halfWidth) offset -= halfWidth;
+    if (offset >= loopWidth) offset -= loopWidth;
     track.style.transform = `translateX(${-offset}px)`;
   }
 
-  tickerOffset += 2.125 * rootPx * dt;
-  const tw = tickerTrack.scrollWidth / 2;
-  if (tw > 0 && tickerOffset >= tw) tickerOffset -= tw;
-  tickerTrack.style.transform = `translateX(${-tickerOffset}px)`;
+  if (tickerLoop > 0) {
+    tickerOffset += 2.125 * rootPx * dt;
+    if (tickerOffset >= tickerLoop) tickerOffset -= tickerLoop;
+    tickerTrack.style.transform = `translateX(${-tickerOffset}px)`;
+  }
 
   drawConfetti(dt);
   requestAnimationFrame(frame);
