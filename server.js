@@ -95,10 +95,26 @@ function stateFor(slotOverride) {
   };
 }
 
+/**
+ * Who is hitting us, and from where. Static assets are noise, but the page
+ * loads and the API calls tell you whether a phone is reaching the machine at
+ * all — the difference between "the network blocks it" and "it loaded and
+ * something else broke".
+ */
+function logRequest(req, url) {
+  if (/\.(css|js|ico|svg|png)$/.test(url.pathname)) return;
+  if (url.pathname === '/api/stream') return;
+  const ip = (req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+  const who = ip === '::1' || ip === '127.0.0.1' ? 'esta compu' : ip;
+  const clock = time.describe().clock;
+  console.log(`  ${clock}  ${req.method} ${url.pathname}${url.search}  <- ${who}`);
+}
+
 // -------------------------------------------------------------------- routes
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   const p = url.pathname;
+  logRequest(req, url);
 
   try {
     if (p === '/' ) return serveStatic(res, 'display.html');
