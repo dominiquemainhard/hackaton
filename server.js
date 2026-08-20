@@ -22,11 +22,28 @@ const MIME = {
   '.ico': 'image/x-icon',
 };
 
-/** The address the QR points at. Override with PUBLIC_URL when behind a tunnel. */
+/** The LAN address of this machine, for when the app runs on someone's laptop. */
 function lanUrl() {
-  if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
   const best = net.lanAddresses()[0];
   return best ? `http://${best.address}:${PORT}` : `http://localhost:${PORT}`;
+}
+
+const LOCAL_HOST = /^(localhost|127\.|\[?::1)/;
+
+/**
+ * Where phones should point their browser. Hosted anywhere with a real
+ * hostname (Vercel, Render, ngrok) the request already tells us the public
+ * address; only on a laptop, where the screen is opened at localhost, do we
+ * have to go looking for the LAN address.
+ */
+function joinUrl(req) {
+  if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '') + '/m';
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  if (host && !LOCAL_HOST.test(host)) {
+    const proto = req.headers['x-forwarded-proto'] || (req.socket.encrypted ? 'https' : 'http');
+    return `${proto}://${host}/m`;
+  }
+  return lanUrl() + '/m';
 }
 
 // ------------------------------------------------------------------ SSE hub
@@ -70,9 +87,9 @@ function serveStatic(res, urlPath) {
   });
 }
 
-function stateFor(slotOverride) {
+function stateFor(slotOverride, req) {
   const t = time.describe();
-  const joinUrl = lanUrl() + '/m';
+  const url = joinUrl(req);
   const slot = slotOverride === 'lunch' || slotOverride === 'snack' ? slotOverride : t.slot;
   if (slot !== t.slot) {
     // Pinned view: label the slot being shown, not the one the clock is in.
@@ -90,10 +107,9 @@ function stateFor(slotOverride) {
     pinned: slot !== t.slot,
     options: db.board(slot),
     feed: db.feed(14, slot),
-    joinUrl,
-    // No LAN address means the QR would point at this machine only: say so on
-    // the wall instead of showing a code nobody can scan.
-    reachable: !/^https?:\/\/(localhost|127\.)/.test(joinUrl),
+    joinUrl: url,
+    // Only true when nothing can reach us: no hostname and no LAN address.
+    reachable: !/^https?:\/\/(localhost|127\.)/.test(url),
     votingOpen: t.phase !== 'closed' || process.env.ALLOW_CLOSED_VOTES === '1',
   };
 }
@@ -114,7 +130,7 @@ function logRequest(req, url) {
 }
 
 // -------------------------------------------------------------------- routes
-const server = http.createServer(async (req, res) => {
+async function handleRequest(req, res) {
   const url = new URL(req.url, 'http://localhost');
   const p = url.pathname;
   logRequest(req, url);
@@ -129,7 +145,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (p === '/api/state' && req.method === 'GET') {
-      return send(res, 200, stateFor(url.searchParams.get('slot')));
+      return send(res, 200, stateFor(url.searchParams.get('slot'), req));
     }
 
     if (p === '/api/reviews' && req.method === 'GET') {
@@ -217,7 +233,16 @@ const server = http.createServer(async (req, res) => {
   } catch (err) {
     return send(res, 400, { error: err.message || 'bad request' });
   }
-});
+}
+
+const server = http.createServer(handleRequest);
+
+// Serverless platforms import the handler and run it per request; there is no
+// process to listen or tick. Only do that when started directly.
+module.exports = handleRequest;
+module.exports.server = server;
+
+if (require.main !== module) return;
 
 // Keeps clocks, slot switches and the 23:00 wipe live on the wall screen.
 setInterval(() => {

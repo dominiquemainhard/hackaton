@@ -48,6 +48,32 @@ unplugged dongle or a NIC without a lease can't hijack the QR. It re-checks ever
 and the wall screen redraws the code if the address changes.
 | `ALLOW_CLOSED_VOTES` | unset | `1` lets people vote outside the windows (handy for demos) |
 
+## Deploying it
+
+One deploy, not two: the wall screen and the phone page are two routes of the same
+server sharing one database.
+
+**A host that runs a process** (Render, Railway, Fly.io, a VPS) is the right fit and needs
+no changes: `npm start`, done. Point a disk at `DB_FILE` and everything works as it does
+locally — SSE included.
+
+**Vercel** works with the `vercel.json` in this repo, with one caveat you have to accept
+or fix:
+
+- Serverless functions get a read-only filesystem and no shared state between instances.
+  `DB_FILE=/tmp/db.json` keeps it from crashing, but **votes and reseñas do not reliably
+  persist** — an instance can vanish, or a second one can serve a request with an empty
+  board. For real use, swap `lib/db.js`'s JSON store for Vercel KV or Postgres. The rest
+  of the app doesn't care where the data lives.
+- `/api/stream` (SSE) can't stay open on a function. Both pages already poll as a
+  fallback, so the board still updates, just on the polling interval rather than instantly.
+- The QR needs no configuration anywhere: the join URL comes from the request's `Host`
+  header, so it's the Vercel domain in production and the LAN IP on a laptop. `PUBLIC_URL`
+  overrides it if you need something else.
+
+The 23:00 reset works fine serverless — it's keyed on a service day checked on every read,
+not on a timer.
+
 ## Timing (Argentina, `America/Argentina/Buenos_Aires`)
 
 | Argentina time | What the screen shows | Voting |
