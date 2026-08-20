@@ -168,7 +168,7 @@ let qrRendered = '';
 function renderQR() {
   if (qrRendered === state.joinUrl) return;
   qrRendered = state.joinUrl;
-  document.getElementById('qr').innerHTML = QR.toSVG(state.joinUrl, { ecc: 'M', quiet: 1 });
+  document.getElementById('qr').innerHTML = QR.toSVG(state.joinUrl, { ecc: 'M', quiet: 3 });
 }
 
 function render() {

@@ -81,18 +81,18 @@ html, body {
   align-items: center;
   gap: 1.25rem;
 }
-#qr { width: 10.5rem; height: 10.5rem; flex: none; }
+#qr { width: 14.5rem; height: 14.5rem; flex: none; }
 #qr svg { display: block; width: 100%; height: 100%; }
 
 #qrCaption { display: flex; flex-direction: column; gap: 0.375rem; max-width: 14rem; }
 #qrCaption strong {
-  font-size: 1.625rem;
+  font-size: 1.875rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   line-height: 1.1;
 }
 #qrCaption span {
-  font-size: 1.1875rem;
+  font-size: 1.375rem;
   color: var(--muted);
   word-break: break-all;
   line-height: 1.2;
@@ -319,7 +319,7 @@ body.narrow #head {
   padding: 0 2rem;
 }
 body.narrow .head-right { justify-content: flex-start; }
-body.narrow #qr { width: 8rem; height: 8rem; }
+body.narrow #qr { width: 10rem; height: 10rem; }
 body.narrow #title { font-size: 5rem; }
 body.narrow #carousel { margin-top: 2rem; }
 body.narrow #track { padding: 0 2rem; }
